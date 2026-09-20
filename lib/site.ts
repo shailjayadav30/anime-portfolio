@@ -21,6 +21,8 @@ export const site = {
     room: "/images/room.svg",
     // Portrait shown in the bottom-right circle of the About page.
     portrait: "/images/utako.svg",
+     roomNight: "/images/room-night.svg",         // NEW
+  roomNightLamp: "/images/room-night-lamp.svg" 
   },
 
   home: {
@@ -151,6 +153,34 @@ export const site = {
       },
     ],
   },
+  contact: {
+  kicker: "Say hello",
+  headline: ["Leave a note", "on the desk"],
+  intro:
+    "Have a project, a question, or just a good book to recommend? Write it here. I read everything myself.",
+  reply: "I usually reply within a few days.",
+  // ja: "夜の部屋で、あなたを待っています。", // "I'm waiting for you in the night room."
+  topics: ["A project", "Working together", "Just saying hi"],
+
+  lampOn: "Switch the lamp on",
+  lampOff: "Switch the lamp off",
+  projectsEndHint: "That’s the last book. Scroll on to write to me.",
+
+  form: {
+    postmark: "night post",
+    topicLabel: "What's it about?",
+    nameLabel: "Shailja Yadav",
+    emailLabel: "shailjayadav7275@gmail.com",
+    messageLabel: "Your message",
+    messagePlaceholder: "Tell me what you have in mind…",
+    send: "Send the note",
+    sending: "Sending…",
+    sentKicker: "Note delivered",
+    sentTitle: "Thank you for writing.",
+    sentText: "Your note is on my desk. I'll reply to the email you gave me.",
+    again: "Write another note",
+  },
+},
 } as const;
 
 export type Fact = (typeof site.about.facts)[number];

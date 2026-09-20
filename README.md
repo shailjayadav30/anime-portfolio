@@ -37,7 +37,7 @@ Swap them for real paintings:
 > cat sleeping bottom-left. Sunlight streaming across the floor and rug. Plants everywhere.
 > **No text overlays, no UI, no logos, no characters.**
 
-### Prompt — girl portrait (About page, square, 2048×2048)
+### Prompt — girl portrait (Ab	out page, square, 2048×2048)
 
 > Anime illustration, warm Studio Ghibli–inspired painterly style. A young woman with dark, shoulder-length
 > hair and soft bangs, seen in three-quarter profile facing left, looking up toward a sunlit window with a
@@ -66,7 +66,7 @@ public/images/           room.svg, about-girl.svg (replace these)
 
 ## The Sun Bloom Reveal
 
-Defined in `globals.css` under `.about`, `.projects`, and `.ring`:
+Defined in `globals.css` under `.about`, `.projects`, and `.ring`:				
 
 - `clip-path: circle(0px at 100% 100%)` → `circle(var(--R) at 100% 100%)`
 - 1.2s, `cubic-bezier(0.22, 1, 0.36, 1)`

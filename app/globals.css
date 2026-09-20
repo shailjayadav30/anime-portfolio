@@ -4,9 +4,7 @@
   initial-value: 0;
 }
 
-/* ==========================================================================
-   UKATO — "A Quiet Room Where Code Lives"
-   ========================================================================== */
+
 
 :root {
   /* Backgrounds */
@@ -91,9 +89,7 @@ button {
   border: 0;
 }
 
-/* ==========================================================================
-   Stage — one room, two emotional states (data-view="home" | "about")
-   ========================================================================== */
+
 
 .stage {
   --R: max(72vw, 122vh); /* final radius of the About bloom */
@@ -104,7 +100,7 @@ button {
   background: #2a1a10;
 }
 
-/* ---- The room ----------------------------------------------------------- */
+
 
 .room {
   position: absolute;
@@ -136,7 +132,7 @@ button {
     linear-gradient(270deg, rgba(38, 20, 6, 0.3) 0%, rgba(38, 20, 6, 0) 26%);
 }
 
-/* ---- Text that lives on the room ----------------------------------------- */
+
 
 .ui-left,
 .ui-right {
@@ -164,7 +160,7 @@ button {
 }
 
 .jp {
-  /* vertical-rl: the first <p> sits on the right, like real tategaki */
+
   writing-mode: vertical-rl;
   font-family: var(--font-jp);
   font-size: clamp(1rem, 1.42vw, 1.5rem);
@@ -316,9 +312,7 @@ button {
   }
 }
 
-/* ==========================================================================
-   Header
-   ========================================================================== */
+
 
 .header {
   position: absolute;
@@ -422,9 +416,7 @@ button {
   background: rgba(232, 193, 107, 0.16);
 }
 
-/* ==========================================================================
-   About — the Sun Bloom Reveal
-   ========================================================================== */
+
 
 .about {
   position: absolute;
@@ -449,7 +441,6 @@ button {
     visibility 0s;
 }
 
-/* the golden edge that travels with the light */
 .ring {
   position: absolute;
   z-index: 6;
@@ -474,7 +465,7 @@ button {
   opacity: 0.85;
 }
 
-/* paper grain */
+
 .about::before {
   content: "";
   position: absolute;
@@ -1517,5 +1508,655 @@ button {
   }
   .book {
     width: 7.6vw;
+  }
+}
+
+
+/* ==========================================================================
+   Contact — the night comes in through the window
+   APPEND THIS TO THE END OF app/globals.css.
+
+   Same room, later still. The night blooms out from the window (50% / 38%)
+   the way the About light bloomed from the bottom-right corner, and a moment
+   later the desk lamp clicks on.
+   ========================================================================== */
+
+.stage {
+  --R3: 150vmax; /* the night fills the whole room */
+}
+
+/* ---- keep the layers underneath painted while the night blooms over them ---- */
+
+/* Projects stays clipped open, then drops to visibility:hidden once the night has covered it
+   (the base .projects rule delays that by --t-bloom). This also takes it out of the tab order. */
+[data-view="contact"] .projects {
+  clip-path: circle(var(--R2) at 100% 100%);
+}
+
+/* the Projects ring fades where it is instead of visibly shrinking over the night */
+[data-view="contact"] .ring--2 {
+  width: calc(var(--R2) * 2);
+  height: calc(var(--R2) * 2);
+  opacity: 0;
+}
+
+/* freeze the Projects scene in its open state so nothing animates away behind the bloom */
+[data-view="contact"] .projects__bg img {
+  transform: scale(1.5);
+  filter: blur(6px) brightness(0.36) saturate(0.85) sepia(0.3);
+}
+
+[data-view="contact"] .dial {
+  --active: var(--idx);
+  transition-duration: 1.7s;
+}
+
+[data-view="contact"] .projects__intro > *,
+[data-view="contact"] .projects__ja,
+[data-view="contact"] .detail-wrap {
+  opacity: 1;
+  transform: none;
+}
+
+[data-view="contact"] .projects__note {
+  opacity: 1;
+  transform: rotate(-4deg);
+}
+
+/* ---- the pale edge of the night --------------------------------------------- */
+
+.night-ring {
+  position: absolute;
+  z-index: 9;
+  left: 50%;
+  top: 38%;
+  width: 0;
+  height: 0;
+  border: 2px solid rgba(196, 208, 255, 0.75);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    width var(--t-bloom) var(--ease),
+    height var(--t-bloom) var(--ease),
+    opacity var(--t-mid) var(--ease);
+}
+
+[data-view="contact"] .night-ring {
+  width: calc(var(--R3) * 2);
+  height: calc(var(--R3) * 2);
+  opacity: 0.8;
+}
+
+/* ---- the section ------------------------------------------------------------- */
+
+.contact {
+  position: absolute;
+  inset: 0;
+  z-index: 7; /* same layer as Projects, later in the DOM, so it sits on top; the left column (z 8) stays above */
+  overflow: hidden;
+  color: var(--cream-ink);
+  background: #0d1226;
+  clip-path: circle(0px at 50% 38%);
+  visibility: hidden;
+  transition:
+    clip-path var(--t-bloom) var(--ease),
+    visibility 0s var(--t-bloom);
+}
+
+[data-view="contact"] .contact {
+  clip-path: circle(var(--R3) at 50% 38%);
+  visibility: visible;
+  transition:
+    clip-path var(--t-bloom) var(--ease),
+    visibility 0s;
+}
+
+/* the two night rooms, stacked; the lamp one fades in on top */
+.contact__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.contact__bg img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transform: scale(1.03);
+  filter: blur(2.5px);
+}
+
+.contact__bg .is-lamp {
+  opacity: 0;
+  transition: opacity 1.8s var(--ease);
+}
+
+.contact.is-lit .contact__bg .is-lamp {
+  opacity: 1;
+}
+
+/* keep the text and the letter readable over the picture */
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(8, 10, 26, 0.66) 0%, rgba(8, 10, 26, 0.18) 50%, rgba(8, 10, 26, 0.5) 100%),
+    linear-gradient(180deg, rgba(8, 10, 26, 0.5) 0%, rgba(8, 10, 26, 0) 26%);
+}
+
+.contact__scroll {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.contact__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.contact__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, min(35vw, 540px));
+  align-items: center;
+  column-gap: clamp(32px, 5vw, 96px);
+  min-height: 100%;
+  padding: clamp(96px, 13vh, 150px) clamp(24px, 5vw, 92px) clamp(28px, 5vh, 56px) clamp(190px, 17vw, 340px);
+}
+
+/* ---- left: what this room is asking ------------------------------------------- */
+
+.contact__intro {
+  max-width: 26em;
+}
+
+.contact__kicker {
+  margin: 0 0 2px;
+  font-family: var(--font-script);
+  font-size: clamp(1.7rem, 2.3vw, 2.5rem);
+  line-height: 1;
+  color: var(--primary);
+}
+
+.contact__title {
+  margin: 0 0 clamp(14px, 2.4vh, 26px);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 2.8vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.contact__lede {
+  margin: 0;
+  max-width: 22em;
+  font-size: clamp(0.82rem, 0.9vw, 0.98rem);
+  line-height: 1.75;
+  color: rgba(255, 246, 230, 0.86);
+}
+
+.contact__links {
+  display: grid;
+  gap: 10px;
+  margin: clamp(20px, 3.4vh, 34px) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.contact__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: 0.86rem;
+  color: var(--cream-ink);
+  border-bottom: 1px solid transparent;
+  transition:
+    color var(--t-slow) var(--ease),
+    transform var(--t-slow) var(--ease);
+}
+
+.contact__links a:hover {
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+.contact__links svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.contact__lamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: clamp(20px, 3.4vh, 34px);
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 246, 230, 0.78);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color var(--t-slow) var(--ease);
+}
+
+.contact__lamp:hover,
+.contact.is-lit .contact__lamp {
+  color: var(--primary);
+}
+
+.contact__lamp svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.contact.is-lit .contact__lamp svg path:first-child {
+  fill: rgba(232, 193, 107, 0.35);
+}
+
+.contact__ja {
+  position: absolute;
+  z-index: 3;
+  left: clamp(190px, 17vw, 340px);
+  bottom: clamp(28px, 7vh, 72px);
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-family: var(--font-jp);
+  font-size: clamp(0.9rem, 1.1vw, 1.2rem);
+  letter-spacing: 0.4em;
+  color: rgba(255, 246, 230, 0.7);
+}
+
+/* one orchestrated arrival: everything settles in after the night has spread */
+.contact__intro > *,
+.contact__ja,
+.letter {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity var(--t-slow) var(--ease),
+    transform var(--t-slow) var(--ease);
+}
+
+[data-view="contact"] .contact__intro > *,
+[data-view="contact"] .contact__ja,
+[data-view="contact"] .letter {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--t-mid) var(--ease),
+    transform var(--t-mid) var(--ease);
+  transition-delay: 0.55s;
+}
+
+[data-view="contact"] .contact__intro > :nth-child(2) {
+  transition-delay: 0.7s;
+}
+[data-view="contact"] .contact__intro > :nth-child(3) {
+  transition-delay: 0.85s;
+}
+[data-view="contact"] .contact__intro > :nth-child(4) {
+  transition-delay: 1s;
+}
+[data-view="contact"] .contact__intro > :nth-child(5) {
+  transition-delay: 1.1s;
+}
+[data-view="contact"] .letter {
+  transition-delay: 0.8s;
+}
+
+/* ---- right: the letter ------------------------------------------------------- */
+
+.letter {
+  position: relative;
+  padding: clamp(22px, 2.4vw, 38px) clamp(22px, 2.4vw, 38px) clamp(20px, 2.2vw, 32px) clamp(30px, 3vw, 48px);
+  border-radius: 3px 10px 10px 3px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  box-shadow: 0 26px 60px rgba(4, 6, 20, 0.55);
+}
+
+/* the gutter, like the open book on the Projects page */
+.letter::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 18px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg, rgba(60, 42, 34, 0.16), rgba(60, 42, 34, 0));
+  pointer-events: none;
+}
+
+.letter__mark {
+  position: absolute;
+  top: -16px;
+  right: 26px;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 6px;
+  border: 1.5px dashed var(--primary-dark);
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  color: var(--primary-dark);
+  font-family: var(--font-script);
+  font-size: 1rem;
+  line-height: 0.95;
+  text-align: center;
+  transform: rotate(9deg);
+  pointer-events: none;
+}
+
+.topics {
+  margin: 0 0 clamp(14px, 2.2vh, 22px);
+  padding: 0;
+  border: 0;
+}
+
+.topics__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.topic {
+  position: relative;
+}
+
+.topic input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.topic span {
+  display: block;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  transition:
+    background-color var(--t-slow) var(--ease),
+    border-color var(--t-slow) var(--ease),
+    color var(--t-slow) var(--ease);
+}
+
+.topic:hover span {
+  border-color: var(--primary-dark);
+}
+
+.topic input:checked + span {
+  border-color: var(--primary-dark);
+  background: rgba(232, 193, 107, 0.24);
+  color: var(--text-primary);
+}
+
+.topic input:focus-visible + span {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 clamp(14px, 1.8vw, 26px);
+}
+
+.field {
+  margin: 0 0 clamp(14px, 2.2vh, 22px);
+}
+
+.field__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0;
+  margin-bottom: 2px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.field__err {
+  font-weight: 400;
+  color: #a4442f;
+}
+
+.field input,
+.field textarea {
+  display: block;
+  width: 100%;
+  padding: 8px 0 7px;
+  border: 0;
+  border-bottom: 1px solid rgba(60, 42, 34, 0.3);
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition:
+    border-color var(--t-slow) var(--ease),
+    box-shadow var(--t-slow) var(--ease);
+}
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--primary-dark);
+  box-shadow: 0 1px 0 var(--primary-dark);
+}
+
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-bottom-color: #a4442f;
+  box-shadow: 0 1px 0 #a4442f;
+}
+
+.field input:disabled,
+.field textarea:disabled {
+  opacity: 0.6;
+}
+
+.field textarea {
+  min-height: 8.75rem;
+  padding-top: 0.35rem;
+  line-height: 1.75rem;
+  resize: vertical;
+  /* ruled writing paper */
+  background-image: repeating-linear-gradient(transparent 0 1.7rem, rgba(60, 42, 34, 0.13) 1.7rem 1.75rem);
+  background-attachment: local;
+}
+
+.field ::placeholder {
+  color: var(--text-muted);
+}
+
+.letter__foot {
+  display: flex;
+  align-items: center;
+  gap: 18px 22px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.letter__send {
+  padding: 14px 24px;
+  border: 1.5px solid var(--text-primary);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform var(--t-slow) var(--ease),
+    box-shadow var(--t-slow) var(--ease),
+    background-color var(--t-slow) var(--ease);
+}
+
+.letter__send:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  background: rgba(232, 193, 107, 0.2);
+}
+
+.letter__send:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.letter__hint {
+  flex: 1 1 10em;
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.letter__error {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid #a4442f;
+  background: rgba(164, 68, 47, 0.08);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.letter__error a {
+  border-bottom: 1px solid currentColor;
+}
+
+/* sent */
+.letter--done {
+  padding-top: clamp(34px, 5vh, 56px);
+  padding-bottom: clamp(30px, 4.5vh, 50px);
+}
+
+.letter__script {
+  margin: 0 0 4px;
+  font-family: var(--font-script);
+  font-size: clamp(1.4rem, 1.8vw, 2rem);
+  line-height: 1;
+  color: var(--primary-dark);
+}
+
+.letter__sent-title {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 2.4vw, 2.6rem);
+  line-height: 1.05;
+}
+
+.letter__sent-text {
+  max-width: 24em;
+  margin: 0 0 22px;
+  font-size: 0.92rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.letter__again {
+  padding: 0 0 3px;
+  border: 0;
+  border-bottom: 1px solid var(--primary-dark);
+  background: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform var(--t-slow) var(--ease),
+    border-color var(--t-slow) var(--ease);
+}
+
+.letter__again:hover {
+  transform: translateY(-3px);
+  border-color: var(--text-primary);
+}
+
+/* ---- responsive ---------------------------------------------------------------- */
+
+@media (max-width: 1100px) {
+  .contact__layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    padding-left: clamp(120px, 14vw, 190px);
+  }
+  .contact__ja {
+    left: clamp(120px, 14vw, 190px);
+  }
+}
+
+@media (max-width: 900px) {
+  .contact__layout {
+    grid-template-columns: 1fr;
+    align-items: start;
+    row-gap: 32px;
+    padding: 124px 20px 40px;
+  }
+
+  .contact__intro {
+    max-width: none;
+  }
+
+  .contact__ja {
+    display: none;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .letter {
+    padding-left: 30px;
+  }
+
+  .contact::before {
+    background: linear-gradient(180deg, rgba(8, 10, 26, 0.72) 0%, rgba(8, 10, 26, 0.5) 100%);
+  }
+}
+
+/* short laptop screens: keep the letter in view without scrolling */
+@media (min-width: 901px) and (max-height: 800px) {
+  .contact__layout {
+    padding-top: 84px;
+  }
+  .contact__title {
+    margin-bottom: 10px;
+  }
+  .contact__links,
+  .contact__lamp {
+    margin-top: 14px;
+  }
+  .letter {
+    padding-top: 20px;
+    padding-bottom: 18px;
+  }
+  .field textarea {
+    min-height: 6.5rem;
   }
 }
