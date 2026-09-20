@@ -1,3 +1,9 @@
+@property --active {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 /* ==========================================================================
    UKATO — "A Quiet Room Where Code Lives"
    ========================================================================== */
@@ -90,7 +96,8 @@ button {
    ========================================================================== */
 
 .stage {
-  --R: max(72vw, 122vh); /* final radius of the sun bloom */
+  --R: max(72vw, 122vh); /* final radius of the About bloom */
+  --R2: 150vmax; /* the Projects bloom fills the whole room */
   position: fixed;
   inset: 0;
   overflow: hidden;
@@ -114,7 +121,7 @@ button {
   transition: filter var(--t-bloom) var(--ease), transform var(--t-bloom) var(--ease);
 }
 
-[data-view="about"] .room__img {
+.stage:not([data-view="home"]) .room__img {
   filter: blur(7px) brightness(0.46) saturate(0.85);
   transform: scale(1.05);
 }
@@ -142,6 +149,7 @@ button {
 }
 
 .ui-left {
+  z-index: 8; /* stays with you as the room gets deeper */
   left: clamp(26px, 4.8vw, 92px);
   top: 29vh;
   align-items: flex-start;
@@ -215,7 +223,7 @@ button {
   transition: opacity var(--t-mid) var(--ease), visibility 0s;
 }
 
-[data-view="about"] .home-only {
+.stage:not([data-view="home"]) .home-only {
   opacity: 0;
   visibility: hidden;
   transition: opacity var(--t-slow) var(--ease), visibility 0s var(--t-slow);
@@ -225,7 +233,7 @@ button {
 .ui-left {
   transition: opacity var(--t-bloom) var(--ease);
 }
-[data-view="about"] .ui-left {
+.stage:not([data-view="home"]) .ui-left {
   opacity: 0.85;
 }
 
@@ -433,7 +441,7 @@ button {
     visibility 0s var(--t-bloom);
 }
 
-[data-view="about"] .about {
+.stage:not([data-view="home"]) .about {
   clip-path: circle(var(--R) at 100% 100%);
   visibility: visible;
   transition:
@@ -460,7 +468,7 @@ button {
     opacity var(--t-mid) var(--ease);
 }
 
-[data-view="about"] .ring {
+[data-view="about"] .ring:not(.ring--2) {
   width: calc(var(--R) * 2);
   height: calc(var(--R) * 2);
   opacity: 0.85;
@@ -837,6 +845,11 @@ button {
     display: none;
   }
 
+  .stage:not([data-view="home"]) .ui-left {
+    opacity: 0;
+    visibility: hidden;
+  }
+
   .ui-left {
     top: 24vh;
   }
@@ -924,5 +937,585 @@ button {
     animation: none !important;
     transition-duration: 0.01ms !important;
     transition-delay: 0s !important;
+  }
+}
+
+
+/* ==========================================================================
+   Projects — deeper into the same room
+   The dial is a clock face whose centre is the bottom-right corner (the same
+   point the light bloomed from). Books sit where the numerals would be.
+   ========================================================================== */
+
+.projects {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  overflow: hidden;
+  color: var(--cream-ink);
+  background: #24160c;
+  clip-path: circle(0px at 100% 100%);
+  visibility: hidden;
+  transition:
+    clip-path var(--t-bloom) var(--ease),
+    visibility 0s var(--t-bloom);
+}
+
+[data-view="projects"] .projects {
+  clip-path: circle(var(--R2) at 100% 100%);
+  visibility: visible;
+  transition:
+    clip-path var(--t-bloom) var(--ease),
+    visibility 0s;
+}
+
+.ring--2 {
+  z-index: 9;
+}
+
+[data-view="projects"] .ring:not(.ring--2) {
+  width: calc(var(--R) * 2);
+  height: calc(var(--R) * 2);
+  opacity: 0;
+}
+
+[data-view="projects"] .ring--2 {
+  width: calc(var(--R2) * 2);
+  height: calc(var(--R2) * 2);
+  opacity: 0.85;
+}
+
+/* the room, closer to the desk, dimmer, later in the day */
+.projects__bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.projects__bg img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transform-origin: 54% 62%;
+  filter: blur(2px) brightness(0.9);
+  transition: transform 2.4s var(--ease), filter 2.4s var(--ease);
+}
+
+[data-view="projects"] .projects__bg img {
+  transform: scale(1.5);
+  filter: blur(6px) brightness(0.36) saturate(0.85) sepia(0.3);
+}
+
+.projects::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 100% 100%, rgba(232, 193, 107, 0.26) 0%, rgba(232, 193, 107, 0) 52%),
+    linear-gradient(90deg, rgba(24, 12, 4, 0.5) 0%, rgba(24, 12, 4, 0) 55%);
+}
+
+/* left: what this room is showing you */
+.projects__intro,
+.projects__ja,
+.projects__note {
+  position: absolute;
+  z-index: 3;
+}
+
+.projects__intro {
+  left: clamp(190px, 17vw, 340px);
+  top: 26vh;
+  width: min(25vw, 400px);
+}
+
+.projects__intro > *,
+.projects__ja,
+.projects__note {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+}
+
+[data-view="projects"] .projects__intro > *,
+[data-view="projects"] .projects__ja,
+[data-view="projects"] .projects__note {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+  transition-delay: 0.55s;
+}
+
+[data-view="projects"] .projects__intro > :nth-child(2) {
+  transition-delay: 0.7s;
+}
+[data-view="projects"] .projects__intro > :nth-child(3) {
+  transition-delay: 0.85s;
+}
+[data-view="projects"] .projects__intro > :nth-child(4) {
+  transition-delay: 1s;
+}
+
+.projects__kicker {
+  margin: 0 0 2px;
+  font-family: var(--font-script);
+  font-size: clamp(1.7rem, 2.3vw, 2.5rem);
+  line-height: 1;
+  color: var(--primary);
+}
+
+.projects__title {
+  margin: 0 0 clamp(14px, 2.4vh, 26px);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 2.8vw, 3.4rem);
+  line-height: 1.1;
+}
+
+.projects__lede {
+  margin: 0;
+  max-width: 22em;
+  font-size: clamp(0.82rem, 0.9vw, 0.98rem);
+  line-height: 1.75;
+  color: rgba(255, 246, 230, 0.82);
+}
+
+.projects__hint {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: clamp(20px, 4vh, 40px) 0 0;
+  font-size: 0.64rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.projects__hint-line {
+  width: 34px;
+  height: 1px;
+  background: currentColor;
+}
+
+.projects__ja {
+  left: clamp(190px, 17vw, 340px);
+  bottom: clamp(28px, 7vh, 72px);
+  writing-mode: vertical-rl;
+  font-family: var(--font-jp);
+  font-size: clamp(0.9rem, 1.1vw, 1.2rem);
+  letter-spacing: 0.4em;
+  color: rgba(255, 246, 230, 0.7);
+}
+
+.projects__note {
+  right: clamp(300px, 36vw, 640px);
+  bottom: clamp(18px, 4vh, 44px);
+  margin: 0;
+  font-family: var(--font-script);
+  font-size: clamp(1.1rem, 1.4vw, 1.5rem);
+  color: var(--primary);
+  transform: rotate(-4deg);
+}
+
+[data-view="projects"] .projects__note {
+  transform: rotate(-4deg);
+}
+
+/* ---- the dial ------------------------------------------------------------ */
+
+.dial {
+  --rd: min(80vh, 58vw); /* radius of the numerals */
+  --step: 13deg; /* angle between neighbouring books */
+  --mid: 226deg; /* where the active book sits (about 10:30, in clock talk) */
+  --active: calc(var(--idx) - 3.4); /* closed: everything waiting past 12 o'clock */
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  transition: --active 1.1s var(--ease);
+}
+
+[data-view="projects"] .dial {
+  --active: var(--idx);
+  transition-duration: 1.7s;
+}
+
+.dial__books {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* one book, placed by trigonometry: angle → x, y around the corner */
+.slot {
+  --d: calc(var(--i) - var(--active));
+  --abs: max(var(--d), var(--d) * -1);
+  --ang: calc(var(--mid) + var(--d) * var(--step));
+  position: absolute;
+  left: calc(cos(var(--ang)) * var(--rd));
+  top: calc(sin(var(--ang)) * var(--rd));
+  opacity: clamp(0, min(calc(3.4 - var(--abs)), calc((3.5 - var(--d)) / 0.6)), 1);
+}
+
+.slot.is-far {
+  pointer-events: none;
+}
+
+.book {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: clamp(88px, 8.4vw, 140px);
+  aspect-ratio: 3 / 4.1;
+  padding: 12px 10px 10px 22px;
+  border: 0;
+  border-radius: 2px 6px 6px 2px;
+  background: var(--cover);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  translate: -50% -50%;
+  scale: clamp(0.84, calc(1.24 - var(--abs) * 0.13), 1.24);
+  transform: perspective(700px) rotateY(0deg) translateZ(0);
+  box-shadow:
+    0 14px 30px rgba(10, 4, 0, 0.4),
+    inset -3px 0 0 rgba(255, 255, 255, 0.28);
+  transition:
+    transform var(--t-slow) var(--ease),
+    box-shadow var(--t-slow) var(--ease);
+}
+
+.book::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 11px;
+  border-radius: 2px 0 0 2px;
+  background: var(--spine);
+  box-shadow: inset -2px 0 0 rgba(0, 0, 0, 0.15);
+}
+
+.book__ribbon {
+  position: absolute;
+  top: -1px;
+  right: 14px;
+  width: 8px;
+  height: 26%;
+  background: var(--spine);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+
+.book__num {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.4rem, 2.2vw, 2.3rem);
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.book__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.book__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(0.95rem, 1.25vw, 1.35rem);
+  line-height: 1.05;
+}
+
+.book__kind {
+  font-size: 0.56rem;
+  letter-spacing: 0.22em;
+  opacity: 0.7;
+}
+
+/* something waking up */
+.book:hover,
+.book:focus-visible {
+  transform: perspective(700px) translateY(-4px) rotateY(-8deg) translateZ(20px);
+  box-shadow:
+    0 22px 44px rgba(10, 4, 0, 0.5),
+    inset -3px 0 0 rgba(255, 255, 255, 0.28);
+}
+
+.slot.is-active .book {
+  transform: perspective(700px) rotateY(-12deg) translateZ(16px);
+  outline: 1.5px solid rgba(232, 193, 107, 0.85);
+  outline-offset: 7px;
+}
+
+/* the numerals ring: ticks that turn with the books */
+.dial__line,
+.dial__ticks {
+  --out: calc(var(--rd) + 180px);
+  position: absolute;
+  width: calc(var(--out) * 2);
+  height: calc(var(--out) * 2);
+  right: calc(var(--out) * -1);
+  bottom: calc(var(--out) * -1);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dial__line {
+  --out: calc(var(--rd) + 156px);
+  border: 1px solid rgba(232, 193, 107, 0.4);
+}
+
+.dial__ticks {
+  transform: rotate(calc(var(--active) * var(--step) * -1));
+}
+
+.dial__ticks--minor {
+  background: repeating-conic-gradient(from 0deg, rgba(232, 193, 107, 0.32) 0 0.25deg, transparent 0.25deg 2.6deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+  mask-image: radial-gradient(closest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+}
+
+.dial__ticks--major {
+  background: repeating-conic-gradient(from 0deg, rgba(232, 193, 107, 0.9) 0 0.35deg, transparent 0.35deg 13deg);
+  -webkit-mask-image: radial-gradient(closest-side, transparent calc(100% - 20px), #000 calc(100% - 20px));
+  mask-image: radial-gradient(closest-side, transparent calc(100% - 20px), #000 calc(100% - 20px));
+}
+
+/* ---- the open book (details) --------------------------------------------- */
+
+.detail-wrap {
+  position: absolute;
+  z-index: 3;
+  right: clamp(24px, 5vw, 92px);
+  bottom: clamp(24px, 4.5vh, 56px);
+  width: min(29vw, 450px);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+}
+
+[data-view="projects"] .detail-wrap {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--t-mid) var(--ease) 0.6s, transform var(--t-mid) var(--ease) 0.6s;
+}
+
+.detail {
+  position: relative;
+  padding: clamp(18px, 2.2vw, 34px) clamp(18px, 2.2vw, 34px) clamp(18px, 2.2vw, 30px) clamp(26px, 2.8vw, 44px);
+  border-radius: 3px 10px 10px 3px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  box-shadow: 0 26px 60px rgba(10, 4, 0, 0.5);
+  animation: page-in 0.9s var(--ease) both;
+}
+
+/* the gutter of an open book */
+.detail::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 18px;
+  border-radius: 3px 0 0 3px;
+  background: linear-gradient(90deg, rgba(60, 42, 34, 0.16), rgba(60, 42, 34, 0));
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.detail__no {
+  margin: 0 0 4px;
+  font-family: var(--font-script);
+  font-size: clamp(1.15rem, 1.4vw, 1.5rem);
+  line-height: 1;
+  color: var(--primary-dark);
+}
+
+.detail__no span {
+  color: var(--text-muted);
+}
+
+.detail__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.7rem, 2.4vw, 2.8rem);
+  line-height: 1.05;
+}
+
+.detail__kind {
+  margin: 6px 0 12px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.detail__blurb {
+  margin: 0 0 14px;
+  font-size: clamp(0.82rem, 0.9vw, 0.95rem);
+  line-height: 1.7;
+}
+
+.detail__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.detail__stack li {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.detail__links {
+  display: flex;
+  gap: 22px;
+  margin: 0;
+}
+
+.detail__links a {
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--primary-dark);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: transform var(--t-slow) var(--ease), border-color var(--t-slow) var(--ease);
+}
+
+.detail__links a:hover {
+  transform: translateY(-3px);
+  border-color: var(--text-primary);
+}
+
+.detail__nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.detail__nav button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1.5px solid rgba(255, 246, 230, 0.7);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cream-ink);
+  cursor: pointer;
+  transition:
+    transform var(--t-slow) var(--ease),
+    background-color var(--t-slow) var(--ease),
+    opacity var(--t-slow) var(--ease);
+}
+
+.detail__nav button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  background: rgba(255, 246, 230, 0.12);
+}
+
+.detail__nav button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.detail__nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+@media (max-width: 900px) {
+  .dial {
+    --rd: 78vw;
+    --step: 17deg;
+  }
+
+  .book {
+    width: 25vw;
+  }
+
+  .projects__intro,
+  .projects__ja,
+  .projects__note {
+    display: none;
+  }
+
+  .detail-wrap {
+    top: 112px;
+    bottom: auto;
+    left: 20px;
+    right: 20px;
+    width: auto;
+  }
+
+  .detail__blurb {
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .detail__nav {
+    display: none;
+  }
+}
+
+/* short laptop screens: a slimmer open book so it never covers the active one */
+@media (min-width: 901px) and (max-height: 800px) {
+  .detail-wrap {
+    bottom: 3vh;
+    width: min(26vw, 400px);
+  }
+  .detail {
+    padding: 16px 18px 14px 26px;
+  }
+  .detail__title {
+    font-size: 1.6rem;
+  }
+  .detail__kind {
+    margin: 4px 0 8px;
+  }
+  .detail__blurb {
+    margin-bottom: 10px;
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+  .detail__stack {
+    margin-bottom: 10px;
+  }
+  .detail__nav {
+    margin-top: 10px;
+  }
+  .book {
+    width: 7.6vw;
   }
 }

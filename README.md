@@ -53,19 +53,20 @@ low and to the right.
 
 ```
 app/
-  [[...slug]]/page.tsx   "/" and "/about" (same room, two states)
-  projects/, contact/    placeholder pages
+  [[...slug]]/page.tsx   "/", "/about", and "/projects" (same room, three states)
+  contact/               placeholder page
   globals.css            design tokens + the Sun Bloom reveal
 components/
-  Experience.tsx         the room, header, scroll logic, About panel
-  Icons.tsx              icons + hand-drawn sprig / cat doodle
-lib/site.ts              all your content
+  Experience.tsx         the room, header, scroll logic, About & Projects panels
+  Icons.tsx              icons + hand-drawn sprig / cat doodle / links
+lib/site.ts              bio, profile, and site content
+lib/projects.ts          projects list and categories
 public/images/           room.svg, about-girl.svg (replace these)
 ```
 
 ## The Sun Bloom Reveal
 
-Defined in `globals.css` under `.about` and `.ring`:
+Defined in `globals.css` under `.about`, `.projects`, and `.ring`:
 
 - `clip-path: circle(0px at 100% 100%)` → `circle(var(--R) at 100% 100%)`
 - 1.2s, `cubic-bezier(0.22, 1, 0.36, 1)`

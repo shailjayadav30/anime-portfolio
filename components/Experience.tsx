@@ -1,27 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MouseEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import { site } from "@/lib/site";
-import {
-  CatDoodle,
-  FactIcon,
-  GithubIcon,
-  LinkedinIcon,
-  MailIcon,
-  Sprig,
-} from "./Icons";
-import Typewriter from "./Typewriter";
+import { CatDoodle, FactIcon, GithubIcon, LinkedinIcon, MailIcon, Sprig } from "./Icons";
 
-export type View = "home" | "about";
+export type View = "home" | "about" | "projects";
 
 const BLOOM_MS = 1300; // 1.2s reveal + a breath, so scroll momentum can't double-fire
-const PATHS: Record<View, string> = { home: "/", about: "/about" };
+const STEP_MS = 800; // one turn of the dial
+const PATHS: Record<View, string> = { home: "/", about: "/about", projects: "/projects" };
 const TITLES: Record<View, string> = {
   home: "Ukato — A quiet room where code lives",
   about: "About — Ukato",
+  projects: "Projects — Ukato",
 };
+const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
 
 const petals = [
   { left: "44%", top: "13%", r: "20deg", d: "0s" },
@@ -34,42 +29,133 @@ const petals = [
   { left: "54%", top: "91%", r: "-25deg", d: "-5s" },
 ];
 
+/** Lets us pass CSS custom properties through `style`. */
+const vars = (v: Record<string, string | number>) => v as unknown as CSSProperties;
+
 function viewFromPath(pathname: string): View {
-  return pathname.replace(/\/+$/, "") === "/about" ? "about" : "home";
+  const p = pathname.replace(/\/+$/, "");
+  return p === "/about" ? "about" : p === "/projects" ? "projects" : "home";
+}
+
+/** Pick dark or cream text for a book cover, whichever contrasts more. */
+function inkFor(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const lin = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((c) => {
+    const s = c / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  });
+  const L = 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+  const vsDark = (L + 0.05) / (0.026 + 0.05);
+  const vsCream = (0.93 + 0.05) / (L + 0.05);
+  return vsDark >= vsCream ? "#3c2a22" : "#fff6e6";
 }
 
 export default function Experience({ initialView }: { initialView: View }) {
   const [view, setView] = useState<View>(initialView);
+  const [active, setActive] = useState(0);
   const viewRef = useRef<View>(initialView);
+  const prevView = useRef<View>(initialView);
+  const activeRef = useRef(0);
   const locked = useRef(false);
+  const lockTimer = useRef<number | undefined>(undefined);
   const aboutScroll = useRef<HTMLDivElement>(null);
 
+  const items = site.projects.items;
+  const COUNT = items.length;
+
   useEffect(() => {
-    viewRef.current = view;
     document.title = TITLES[view];
   }, [view]);
 
-  /** Move between the two states of the room. */
-  const go = useCallback((next: View, push = true) => {
-    if (viewRef.current === next || locked.current) return;
+  const lock = useCallback((ms: number) => {
     locked.current = true;
-    viewRef.current = next;
-    setView(next);
-    if (push) window.history.pushState({ view: next }, "", PATHS[next]);
-    window.setTimeout(() => {
+    window.clearTimeout(lockTimer.current);
+    lockTimer.current = window.setTimeout(() => {
       locked.current = false;
-    }, BLOOM_MS);
+    }, ms);
   }, []);
 
-  // Scroll / swipe / keys
-  useEffect(() => {
-    const atTop = () => (aboutScroll.current?.scrollTop ?? 0) <= 2;
+  /** Move between the states of the room. */
+  const go = useCallback(
+    (next: View, push = true) => {
+      if (viewRef.current === next || locked.current) return;
+      lock(BLOOM_MS);
+      viewRef.current = next;
+      if (next === "projects") {
+        activeRef.current = 0;
+        setActive(0);
+      }
+      setView(next);
+      if (push) window.history.pushState({ view: next }, "", PATHS[next]);
+    },
+    [lock],
+  );
 
+  /** Turn the dial to a project. */
+  const turnTo = useCallback(
+    (i: number) => {
+      const n = Math.max(0, Math.min(COUNT - 1, i));
+      if (n === activeRef.current) return;
+      activeRef.current = n;
+      setActive(n);
+      lock(STEP_MS);
+    },
+    [COUNT, lock],
+  );
+
+  /**
+   * One "notch" of scrolling. Returns true if it did something, so key presses
+   * know whether to suppress the browser's own scrolling.
+   */
+  const advance = useCallback(
+    (dir: 1 | -1): boolean => {
+      if (locked.current) return false;
+      const v = viewRef.current;
+
+      if (v === "home") {
+        if (dir === 1) {
+          go("about");
+          return true;
+        }
+        return false;
+      }
+
+      if (v === "about") {
+        const el = aboutScroll.current;
+        const atTop = !el || el.scrollTop <= 2;
+        const atBottom = !el || el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+        if (dir === -1 && atTop) {
+          go("home");
+          return true;
+        }
+        if (dir === 1 && atBottom) {
+          go("projects");
+          return true;
+        }
+        return false;
+      }
+
+      // projects: scrolling turns the dial; past the first book, go back to About
+      const a = activeRef.current;
+      if (dir === 1) {
+        if (a < COUNT - 1) {
+          turnTo(a + 1);
+          return true;
+        }
+        return false;
+      }
+      if (a > 0) turnTo(a - 1);
+      else go("about");
+      return true;
+    },
+    [COUNT, go, turnTo],
+  );
+
+  // Scroll / swipe / keys / history
+  useEffect(() => {
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 24) return;
-      if (viewRef.current === "home" && e.deltaY > 0) go("about");
-      else if (viewRef.current === "about" && e.deltaY < 0 && atTop())
-        go("home");
+      advance(e.deltaY > 0 ? 1 : -1);
     };
 
     let startY = 0;
@@ -78,30 +164,21 @@ export default function Experience({ initialView }: { initialView: View }) {
     };
     const onTouchEnd = (e: TouchEvent) => {
       const dy = startY - e.changedTouches[0].clientY;
-      if (viewRef.current === "home" && dy > 60) go("about");
-      else if (viewRef.current === "about" && dy < -60 && atTop()) go("home");
+      if (Math.abs(dy) > 60) advance(dy > 0 ? 1 : -1);
     };
 
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (
-        t &&
-        t !== document.body &&
-        /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)
-      )
+      if (e.key === "Escape") {
+        if (viewRef.current === "projects") go("about");
+        else if (viewRef.current === "about") go("home");
         return;
-      if (
-        viewRef.current === "home" &&
-        ["ArrowDown", "PageDown", " "].includes(e.key)
-      ) {
-        e.preventDefault();
-        go("about");
-      } else if (
-        viewRef.current === "about" &&
-        ["ArrowUp", "PageUp", "Escape"].includes(e.key) &&
-        atTop()
-      ) {
-        go("home");
+      }
+      if (t && t !== document.body && /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (["ArrowDown", "PageDown", " "].includes(e.key)) {
+        if (advance(1)) e.preventDefault();
+      } else if (["ArrowUp", "PageUp"].includes(e.key)) {
+        if (advance(-1)) e.preventDefault();
       }
     };
 
@@ -125,11 +202,13 @@ export default function Experience({ initialView }: { initialView: View }) {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("popstate", onPop);
     };
-  }, [go]);
+  }, [advance, go]);
 
-  // Keep the About panel scrolled to the top each time the light arrives.
+  // Start About at the top each time the light arrives from the room
+  // (but not when coming back up from Projects — that would be visible).
   useEffect(() => {
-    if (view === "about") aboutScroll.current?.scrollTo({ top: 0 });
+    if (view === "about" && prevView.current === "home") aboutScroll.current?.scrollTo({ top: 0 });
+    prevView.current = view;
   }, [view]);
 
   const intercept = (next: View) => (e: MouseEvent) => {
@@ -138,37 +217,14 @@ export default function Experience({ initialView }: { initialView: View }) {
     go(next);
   };
 
-  const { home, about } = site;
+  const { home, about, projects } = site;
+  const current = items[active];
+  const atEnd = active === COUNT - 1;
 
-  const typingText = useMemo(
-  () => [...home.jaLines, "", ...home.tagline].join("\n"),
-  [home.jaLines, home.tagline]
-);
-
-const [typedIndex, setTypedIndex] = useState(0);
-
-const TYPE_SPEED = 110;
-const RESTART_DELAY = 2200;
-
-useEffect(() => {
-  if (typedIndex < typingText.length) {
-    const timer = window.setTimeout(() => {
-      setTypedIndex((prev) => prev + 1);
-    }, TYPE_SPEED);
-
-    return () => window.clearTimeout(timer);
-  }
-
-  const restartTimer = window.setTimeout(() => {
-    setTypedIndex(0);
-  }, RESTART_DELAY);
-
-  return () => window.clearTimeout(restartTimer);
-}, [typedIndex, typingText]);
   return (
     <main className="stage" data-view={view}>
       {/* ------------------------------------------------------------ the room */}
-      <section className="room" aria-hidden={view === "about"}>
+      <section className="room" aria-hidden={view !== "home"}>
         <h1 className="sr-only">{home.heroLines.join(" ")}</h1>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -180,83 +236,40 @@ useEffect(() => {
         <div className="room__shade" />
       </section>
 
-
-<div className="ui-left">
-  <div className="jp" lang="ja" aria-hidden="true">
-    {home.jaLines.map((line, index) => {
-      const lineStart = home.jaLines
-        .slice(0, index)
-        .reduce((total, current) => total + current.length + 1, 0);
-
-      const visibleLength = Math.max(
-        0,
-        Math.min(line.length, typedIndex - lineStart)
-      );
-
-      return <p key={line}>{line.slice(0, visibleLength)}</p>;
-    })}
-  </div>
-
-  <span className="rule" aria-hidden="true" />
-
-  <p className="tag">
-    {home.tagline.map((line, index) => {
-      const jaLength = home.jaLines.reduce(
-        (total, current) => total + current.length + 1,
-        0
-      );
-
-      // +1 for the empty line between Japanese text and tagline
-      const taglineStart =
-        jaLength +
-        1 +
-        home.tagline
-          .slice(0, index)
-          .reduce((total, current) => total + current.length + 1, 0);
-
-      const visibleLength = Math.max(
-        0,
-        Math.min(line.length, typedIndex - taglineStart)
-      );
-
-      return (
-        <Fragment key={line}>
-          {line.slice(0, visibleLength)}
-          {index < home.tagline.length - 1 && <br />}
-        </Fragment>
-      );
-    })}
-  </p>
-</div>
-
+      <div className="ui-left">
+        <div className="jp" lang="ja" aria-hidden="true">
+          {home.jaLines.map((l) => (
+            <p key={l}>{l}</p>
+          ))}
+        </div>
+        <span className="rule" aria-hidden="true" />
+        <p className="tag">
+          {home.tagline.map((l, i) => (
+            <Fragment key={l}>
+              {l}
+              {i < home.tagline.length - 1 && <br />}
+            </Fragment>
+          ))}
+        </p>
+      </div>
 
       <div className="ui-right home-only">
         <p className="kana" lang="ja" aria-hidden="true">
           {site.brandKana}
         </p>
         <span className="rule rule--v" aria-hidden="true" />
-        <ul className="motto">
+        {/* <ul className="motto">
           {home.motto.map((m) => (
             <li key={m}>{m}</li>
           ))}
-        </ul>
+        </ul> */}
       </div>
 
       <div className="socials home-only">
-        <a
-          href={site.github}
-          aria-label="GitHub"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={site.github} aria-label="GitHub" target="_blank" rel="noreferrer">
           <GithubIcon />
         </a>
-        <a
-          href={site.linkedin}
-          aria-label="LinkedIn"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={site.linkedin} aria-label="LinkedIn" target="_blank" rel="noreferrer">
           <LinkedinIcon />
         </a>
         <a href={`mailto:${site.email}`} aria-label="Email">
@@ -264,11 +277,7 @@ useEffect(() => {
         </a>
       </div>
 
-      <button
-        className="cue home-only"
-        type="button"
-        onClick={() => go("about")}
-      >
+      <button className="cue home-only" type="button" onClick={() => go("about")}>
         <span className="cue__mouse" aria-hidden="true">
           <span className="cue__dot" />
         </span>
@@ -277,12 +286,7 @@ useEffect(() => {
 
       {/* --------------------------------------------------------------- header */}
       <header className="header">
-        <Link
-          className="logo"
-          href="/"
-          aria-label={`${site.brand} — home`}
-          onClick={intercept("home")}
-        >
+        <Link className="logo" href="/" aria-label={`${site.brand} — home`} onClick={intercept("home")}>
           {site.brand}
         </Link>
         <nav className="nav" aria-label="Primary">
@@ -302,34 +306,28 @@ useEffect(() => {
           >
             About
           </Link>
-          <Link className="nav__link" href="/projects">
+          <Link
+            className="nav__link"
+            href="/projects"
+            aria-current={view === "projects" ? "page" : undefined}
+            onClick={intercept("projects")}
+          >
             Projects
           </Link>
           <Link className="nav__link" href="/contact">
             Contact
           </Link>
-          {/* <a className="cta" href={`mailto:${site.email}`}>
-            Let&rsquo;s talk
-          </a> */}
+        
         </nav>
       </header>
 
       {/* ---------------------------------------------- about · the sun bloom */}
-      <section
-        className="about"
-        aria-label="About me"
-        aria-hidden={view !== "about"}
-      >
+      <section className="about" aria-label="About me" aria-hidden={view !== "about"}>
         {petals.map((p, i) => (
           <span
             key={i}
             className="petal"
-            style={{
-              left: p.left,
-              top: p.top,
-              animationDelay: p.d,
-              ["--r" as string]: p.r,
-            }}
+            style={vars({ left: p.left, top: p.top, animationDelay: p.d, "--r": p.r })}
             aria-hidden="true"
           />
         ))}
@@ -357,8 +355,7 @@ useEffect(() => {
             <h2 className="about__title">
               {about.headline[0]}
               <br />
-              {about.headline[1]} <em>{about.headline[2]}</em>{" "}
-              {about.headline[3]}
+              {about.headline[1]} <em>{about.headline[2]}</em> {about.headline[3]}
             </h2>
 
             <p className="about__bio">
@@ -397,8 +394,138 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* the golden edge of the light, travelling with the bloom */}
+      {/* ------------------------------ projects · deeper into the same room */}
+      <section className="projects" aria-label="Projects" aria-hidden={view !== "projects"}>
+        {/* the same room again — closer, dimmer, later in the day */}
+        <div className="projects__bg" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={site.assets.room} alt="" />
+        </div>
+
+        <div className="projects__intro">
+          <p className="projects__kicker">{projects.kicker}</p>
+          <h2 className="projects__title">
+            {projects.headline[0]}
+            <br />
+            {projects.headline[1]}
+          </h2>
+          <p className="projects__lede">{projects.intro}</p>
+          <p className="projects__hint">
+            <span className="projects__hint-line" aria-hidden="true" />
+            {atEnd ? "That’s the last book on the shelf." : "Scroll to turn the dial"}
+          </p>
+        </div>
+
+        <p className="projects__ja" lang="ja" aria-hidden="true">
+          {projects.ja}
+        </p>
+
+        {/* the dial: a clock face whose centre is the corner of the room */}
+        <div className="dial" style={vars({ "--idx": active })}>
+          <div className="dial__line" aria-hidden="true" />
+          <div className="dial__ticks dial__ticks--minor" aria-hidden="true" />
+          <div className="dial__ticks dial__ticks--major" aria-hidden="true" />
+
+          <ul className="dial__books">
+            {items.map((p, i) => {
+              const d = i - active;
+              const far = d > 3.3 || d < -3.2;
+              return (
+                <li
+                  key={p.title}
+                  className={`slot${i === active ? " is-active" : ""}${far ? " is-far" : ""}`}
+                  style={vars({ "--i": i })}
+                >
+                  <button
+                    type="button"
+                    className="book"
+                    style={vars({
+                      "--cover": p.cover,
+                      "--spine": `color-mix(in srgb, ${p.cover} 76%, #3c2a22)`,
+                      "--ink": inkFor(p.cover),
+                    })}
+                    onClick={() => turnTo(i)}
+                    tabIndex={far ? -1 : 0}
+                    aria-label={`${p.title}, project ${i + 1} of ${COUNT}`}
+                    aria-current={i === active ? "true" : undefined}
+                  >
+                    <span className="book__ribbon" aria-hidden="true" />
+                    <span className="book__num" aria-hidden="true">
+                      {ROMAN[i]}
+                    </span>
+                    <span className="book__meta">
+                      <span className="book__title">{p.title}</span>
+                      <span className="book__kind">{p.year}</span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <p className="projects__note" aria-hidden="true">
+          {projects.note}
+        </p>
+
+        {/* the open book */}
+        <div className="detail-wrap">
+          <article className="detail" key={active} aria-live="polite">
+            <p className="detail__no">
+              Book {ROMAN[active]} <span>of {ROMAN[COUNT - 1]}</span>
+            </p>
+            <h3 className="detail__title">{current.title}</h3>
+            <p className="detail__kind">
+              {current.kind} · {current.year}
+            </p>
+            <p className="detail__blurb">{current.blurb}</p>
+            <ul className="detail__stack">
+              {current.stack.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+            <p className="detail__links">
+              {current.live && (
+                <a href={current.live} target="_blank" rel="noreferrer">
+                  Visit the site
+                </a>
+              )}
+              {current.repo && (
+                <a href={current.repo} target="_blank" rel="noreferrer">
+                  Read the code
+                </a>
+              )}
+            </p>
+          </article>
+
+          <div className="detail__nav">
+            <button
+              type="button"
+              aria-label="Previous project"
+              onClick={() => turnTo(active - 1)}
+              disabled={active === 0}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 15l6-6 6 6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              aria-label="Next project"
+              onClick={() => turnTo(active + 1)}
+              disabled={atEnd}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* the golden edges of the light, travelling with each bloom */}
       <span className="ring" aria-hidden="true" />
+      <span className="ring ring--2" aria-hidden="true" />
     </main>
   );
 }
