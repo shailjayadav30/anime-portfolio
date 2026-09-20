@@ -3,8 +3,7 @@ import Experience from "@/components/Experience";
 
 type Props = { params: { slug?: string[] } };
 
-// "/", "/about" and "/projects" are the same room in three states.
-// Real folders (contact) win over this catch-all.
+
 export const dynamicParams = false;
 
 export function generateStaticParams() {
@@ -12,11 +11,21 @@ export function generateStaticParams() {
 }
 
 const viewOf = (slug?: string[]) =>
-  slug?.[0] === "about" ? "about" : slug?.[0] === "projects" ? "projects" : "home";
+  slug?.[0] === "about"
+    ? "about"
+    : slug?.[0] === "projects"
+      ? "projects"
+      : slug?.[0] === "contact"
+        ? "contact"
+        : "home";
 
 export function generateMetadata({ params }: Props): Metadata {
   const v = viewOf(params.slug);
-  return v === "about" ? { title: "About — Ukato" } : v === "projects" ? { title: "Projects — Ukato" } : {};
+  return v === "about"
+    ? { title: "About — Shailja" }
+    : v === "projects"
+      ? { title: "Projects — Shailja" }
+      : {};
 }
 
 export default function Page({ params }: Props) {

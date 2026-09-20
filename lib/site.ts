@@ -16,12 +16,11 @@ export const site = {
   linkedin: "https://www.linkedin.com/in/shailja-yadav-643853252",
 
   assets: {
-    // Full-bleed room scene (landing page + blurred "past" behind About).
-    // Replace with /images/room.jpg (or .png / .webp) once you generate one.
+
     room: "/images/room.svg",
-    // Portrait shown in the bottom-right circle of the About page.
+
     portrait: "/images/utako.svg",
-     roomNight: "/images/room-night.svg",         // NEW
+     roomNight: "/images/room-night.svg",         
   roomNightLamp: "/images/room-night-lamp.svg" 
   },
 
