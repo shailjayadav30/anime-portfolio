@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { site } from "@/lib/site";
-import { CatDoodle, FactIcon, GithubIcon, LinkedinIcon, MailIcon, Sprig } from "./Icons";
+import {
+  CatDoodle,
+  FactIcon,
+  GithubIcon,
+  LinkedinIcon,
+  MailIcon,
+  Sprig,
+} from "./Icons";
+import Typewriter from "./Typewriter";
 
 export type View = "home" | "about";
 
@@ -60,7 +68,8 @@ export default function Experience({ initialView }: { initialView: View }) {
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 24) return;
       if (viewRef.current === "home" && e.deltaY > 0) go("about");
-      else if (viewRef.current === "about" && e.deltaY < 0 && atTop()) go("home");
+      else if (viewRef.current === "about" && e.deltaY < 0 && atTop())
+        go("home");
     };
 
     let startY = 0;
@@ -75,11 +84,23 @@ export default function Experience({ initialView }: { initialView: View }) {
 
     const onKey = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && t !== document.body && /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
-      if (viewRef.current === "home" && ["ArrowDown", "PageDown", " "].includes(e.key)) {
+      if (
+        t &&
+        t !== document.body &&
+        /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)
+      )
+        return;
+      if (
+        viewRef.current === "home" &&
+        ["ArrowDown", "PageDown", " "].includes(e.key)
+      ) {
         e.preventDefault();
         go("about");
-      } else if (viewRef.current === "about" && ["ArrowUp", "PageUp", "Escape"].includes(e.key) && atTop()) {
+      } else if (
+        viewRef.current === "about" &&
+        ["ArrowUp", "PageUp", "Escape"].includes(e.key) &&
+        atTop()
+      ) {
         go("home");
       }
     };
@@ -119,6 +140,31 @@ export default function Experience({ initialView }: { initialView: View }) {
 
   const { home, about } = site;
 
+  const typingText = useMemo(
+  () => [...home.jaLines, "", ...home.tagline].join("\n"),
+  [home.jaLines, home.tagline]
+);
+
+const [typedIndex, setTypedIndex] = useState(0);
+
+const TYPE_SPEED = 110;
+const RESTART_DELAY = 2200;
+
+useEffect(() => {
+  if (typedIndex < typingText.length) {
+    const timer = window.setTimeout(() => {
+      setTypedIndex((prev) => prev + 1);
+    }, TYPE_SPEED);
+
+    return () => window.clearTimeout(timer);
+  }
+
+  const restartTimer = window.setTimeout(() => {
+    setTypedIndex(0);
+  }, RESTART_DELAY);
+
+  return () => window.clearTimeout(restartTimer);
+}, [typedIndex, typingText]);
   return (
     <main className="stage" data-view={view}>
       {/* ------------------------------------------------------------ the room */}
@@ -134,22 +180,55 @@ export default function Experience({ initialView }: { initialView: View }) {
         <div className="room__shade" />
       </section>
 
-      <div className="ui-left">
-        <div className="jp" lang="ja" aria-hidden="true">
-          {home.jaLines.map((l) => (
-            <p key={l}>{l}</p>
-          ))}
-        </div>
-        <span className="rule" aria-hidden="true" />
-        <p className="tag">
-          {home.tagline.map((l, i) => (
-            <Fragment key={l}>
-              {l}
-              {i < home.tagline.length - 1 && <br />}
-            </Fragment>
-          ))}
-        </p>
-      </div>
+
+<div className="ui-left">
+  <div className="jp" lang="ja" aria-hidden="true">
+    {home.jaLines.map((line, index) => {
+      const lineStart = home.jaLines
+        .slice(0, index)
+        .reduce((total, current) => total + current.length + 1, 0);
+
+      const visibleLength = Math.max(
+        0,
+        Math.min(line.length, typedIndex - lineStart)
+      );
+
+      return <p key={line}>{line.slice(0, visibleLength)}</p>;
+    })}
+  </div>
+
+  <span className="rule" aria-hidden="true" />
+
+  <p className="tag">
+    {home.tagline.map((line, index) => {
+      const jaLength = home.jaLines.reduce(
+        (total, current) => total + current.length + 1,
+        0
+      );
+
+      // +1 for the empty line between Japanese text and tagline
+      const taglineStart =
+        jaLength +
+        1 +
+        home.tagline
+          .slice(0, index)
+          .reduce((total, current) => total + current.length + 1, 0);
+
+      const visibleLength = Math.max(
+        0,
+        Math.min(line.length, typedIndex - taglineStart)
+      );
+
+      return (
+        <Fragment key={line}>
+          {line.slice(0, visibleLength)}
+          {index < home.tagline.length - 1 && <br />}
+        </Fragment>
+      );
+    })}
+  </p>
+</div>
+
 
       <div className="ui-right home-only">
         <p className="kana" lang="ja" aria-hidden="true">
@@ -164,10 +243,20 @@ export default function Experience({ initialView }: { initialView: View }) {
       </div>
 
       <div className="socials home-only">
-        <a href={site.github} aria-label="GitHub" target="_blank" rel="noreferrer">
+        <a
+          href={site.github}
+          aria-label="GitHub"
+          target="_blank"
+          rel="noreferrer"
+        >
           <GithubIcon />
         </a>
-        <a href={site.linkedin} aria-label="LinkedIn" target="_blank" rel="noreferrer">
+        <a
+          href={site.linkedin}
+          aria-label="LinkedIn"
+          target="_blank"
+          rel="noreferrer"
+        >
           <LinkedinIcon />
         </a>
         <a href={`mailto:${site.email}`} aria-label="Email">
@@ -175,7 +264,11 @@ export default function Experience({ initialView }: { initialView: View }) {
         </a>
       </div>
 
-      <button className="cue home-only" type="button" onClick={() => go("about")}>
+      <button
+        className="cue home-only"
+        type="button"
+        onClick={() => go("about")}
+      >
         <span className="cue__mouse" aria-hidden="true">
           <span className="cue__dot" />
         </span>
@@ -184,7 +277,12 @@ export default function Experience({ initialView }: { initialView: View }) {
 
       {/* --------------------------------------------------------------- header */}
       <header className="header">
-        <Link className="logo" href="/" aria-label={`${site.brand} — home`} onClick={intercept("home")}>
+        <Link
+          className="logo"
+          href="/"
+          aria-label={`${site.brand} — home`}
+          onClick={intercept("home")}
+        >
           {site.brand}
         </Link>
         <nav className="nav" aria-label="Primary">
@@ -217,12 +315,21 @@ export default function Experience({ initialView }: { initialView: View }) {
       </header>
 
       {/* ---------------------------------------------- about · the sun bloom */}
-      <section className="about" aria-label="About me" aria-hidden={view !== "about"}>
+      <section
+        className="about"
+        aria-label="About me"
+        aria-hidden={view !== "about"}
+      >
         {petals.map((p, i) => (
           <span
             key={i}
             className="petal"
-            style={{ left: p.left, top: p.top, animationDelay: p.d, ["--r" as string]: p.r }}
+            style={{
+              left: p.left,
+              top: p.top,
+              animationDelay: p.d,
+              ["--r" as string]: p.r,
+            }}
             aria-hidden="true"
           />
         ))}
@@ -250,7 +357,8 @@ export default function Experience({ initialView }: { initialView: View }) {
             <h2 className="about__title">
               {about.headline[0]}
               <br />
-              {about.headline[1]} <em>{about.headline[2]}</em> {about.headline[3]}
+              {about.headline[1]} <em>{about.headline[2]}</em>{" "}
+              {about.headline[3]}
             </h2>
 
             <p className="about__bio">
@@ -280,7 +388,10 @@ export default function Experience({ initialView }: { initialView: View }) {
 
             <figure className="portrait">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={site.assets.portrait} alt="Portrait of a girl with dark hair in a cream sweater, holding a coffee mug and looking toward a sunlit window." />
+              <img
+                src={site.assets.portrait}
+                alt="Portrait of a girl with dark hair in a cream sweater, holding a coffee mug and looking toward a sunlit window."
+              />
             </figure>
           </div>
         </div>

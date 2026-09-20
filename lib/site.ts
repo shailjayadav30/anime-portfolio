@@ -3,12 +3,12 @@
  * Swap the two image paths below when you have your own artwork.
  */
 export const site = {
-  brand: "UKATO",
-  brandKana: "うかと",
-  name: "Your Name", // <- put your real name here
-  email: "hello@example.com",
-  github: "https://github.com/",
-  linkedin: "https://www.linkedin.com/",
+  brand: "SHAILJA",
+  brandKana: "シャイリャ",
+  name: "shailja yadav", // <- put your real name here
+  email: "shailjayadav7275@gmail.com",
+  github: "https://github.com/shailjayadav30",
+  linkedin: "https://www.linkedin.com/in/shailja-yadav-643853252/",
 
   assets: {
     // Full-bleed room scene (landing page + blurred "past" behind About).
@@ -32,10 +32,26 @@ export const site = {
     quote: "A bit different, and that's okay.",
     note: ["same girl,", "different tab :)"],
     facts: [
-      { icon: "code", title: "Development", text: "Full Stack Web Apps that work and scale." },
-      { icon: "palette", title: "Design", text: "Clean, thoughtful user experiences." },
-      { icon: "book", title: "Learning", text: "Always curious, always building." },
-      { icon: "leaf", title: "Life", text: "Anime, gym, plants and good coffee." },
+      {
+        icon: "code",
+        title: "Development",
+        text: "Full Stack Web Apps that work and scale.",
+      },
+      {
+        icon: "palette",
+        title: "Design",
+        text: "Clean, thoughtful user experiences.",
+      },
+      {
+        icon: "book",
+        title: "Learning",
+        text: "Always curious, always building.",
+      },
+      {
+        icon: "leaf",
+        title: "Life",
+        text: "Anime, gym, plants and good coffee.",
+      },
     ],
     stats: [
       { value: "23", label: "Years old" },
