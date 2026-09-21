@@ -1,27 +1,19 @@
-/**
- * Everything you'll want to edit lives here.
- * Swap the two image paths below when you have your own artwork.
- */
-
 import { commits } from "./commits";
-
-
 
 export const site = {
   brand: "SHAILJA",
   brandKana: "シャイリャ",
-  name: "Shailja Yadav", // <- put your real name here
+  name: "Shailja Yadav",
   email: "shailjayadav7275@gmail.com",
   github: "https://github.com/shailjayadav30",
   linkedin: "https://www.linkedin.com/in/shailja-yadav-643853252",
 
   assets: {
-
     room: "/images/room.svg",
 
     portrait: "/images/utako.svg",
-     roomNight: "/images/room-night.svg",         
-  roomNightLamp: "/images/room-night-lamp.svg" 
+    roomNight: "/images/room-night.svg",
+    roomNightLamp: "/images/room-night-lamp.svg",
   },
 
   home: {
@@ -75,26 +67,6 @@ export const site = {
     ja: "つくったもの",
 
     items: [
-      // {
-      //   title: "Curricula",
-      //   kind: "AI-powered syllabus tracker",
-      //   year: "2026",
-      //   cover: "#9fae8c",
-      //   blurb:
-      //     "A mobile-first study companion that transforms syllabus content into structured subjects, units, topics, and subtopics, helping students track their learning step by step.",
-      //   stack: [
-      //     "React Native",
-      //     "Expo",
-      //     "Express",
-      //     "TypeScript",
-      //     "Prisma",
-      //     "PostgreSQL",
-      //     "Gemini API",
-      //   ],
-      //   live: "",
-      //   repo: "",
-      // },
-
       {
         title: "Jungle Safari",
         kind: "Wildlife safari booking platform",
@@ -153,33 +125,33 @@ export const site = {
     ],
   },
   contact: {
-  kicker: "Say hello",
-  headline: ["Leave a note", "on the desk"],
-  intro:
-    "Have a project, a question, or just a good book to recommend? Write it here. I read everything myself.",
-  reply: "I usually reply within a few days.",
-  // ja: "夜の部屋で、あなたを待っています。", // "I'm waiting for you in the night room."
-  topics: ["A project", "Working together", "Just saying hi"],
+    kicker: "Say hello",
+    headline: ["Leave a note", "on the desk"],
+    intro:
+      "Have a project, a question, or just a good book to recommend? Write it here. I read everything myself.",
+    reply: "I usually reply within a few days.",
+    // ja: "夜の部屋で、あなたを待っています。", // "I'm waiting for you in the night room."
+    topics: ["A project", "Working together", "Just saying hi"],
 
-  lampOn: "Switch the lamp on",
-  lampOff: "Switch the lamp off",
-  projectsEndHint: "That’s the last book. Scroll on to write to me.",
+    lampOn: "Switch the lamp on",
+    lampOff: "Switch the lamp off",
+    projectsEndHint: "That’s the last book. Scroll on to write to me.",
 
-  form: {
-    postmark: "night post",
-    topicLabel: "What's it about?",
-    nameLabel: "Shailja Yadav",
-    emailLabel: "shailjayadav7275@gmail.com",
-    messageLabel: "Your message",
-    messagePlaceholder: "Tell me what you have in mind…",
-    send: "Send the note",
-    sending: "Sending…",
-    sentKicker: "Note delivered",
-    sentTitle: "Thank you for writing.",
-    sentText: "Your note is on my desk. I'll reply to the email you gave me.",
-    again: "Write another note",
+    form: {
+      postmark: "night post",
+      topicLabel: "What's it about?",
+      nameLabel: "Shailja Yadav",
+      emailLabel: "shailjayadav7275@gmail.com",
+      messageLabel: "Your message",
+      messagePlaceholder: "Tell me what you have in mind…",
+      send: "Send the note",
+      sending: "Sending…",
+      sentKicker: "Note delivered",
+      sentTitle: "Thank you for writing.",
+      sentText: "Your note is on my desk. I'll reply to the email you gave me.",
+      again: "Write another note",
+    },
   },
-},
 } as const;
 
 export type Fact = (typeof site.about.facts)[number];

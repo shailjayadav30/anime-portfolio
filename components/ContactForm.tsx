@@ -13,7 +13,7 @@ interface Values {
   email: string;
   topic: string;
   message: string;
-  website: string; // honeypot — real people never see or fill this
+  website: string; 
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -102,7 +102,7 @@ export default function ContactForm() {
     `${values.topic} — ${values.name || "hello"}`,
   )}&body=${encodeURIComponent(values.message)}`;
 
-  /* ------------------------------------------------------------ sent */
+
   if (status === "sent") {
     return (
       <div className="letter letter--done" role="status">
@@ -119,7 +119,6 @@ export default function ContactForm() {
     );
   }
 
-  /* ------------------------------------------------------------ form */
   const busy = status === "sending";
 
   return (
@@ -219,7 +218,7 @@ export default function ContactForm() {
           />
         </div>
 
-        {/* honeypot: hidden from people and screen readers, tempting to bots */}
+      
         <div className="sr-only" aria-hidden="true">
           <label>
             Leave this empty

@@ -732,9 +732,6 @@ button {
   }
 }
 
-/* ==========================================================================
-   Coming-soon pages
-   ========================================================================== */
 
 .soon {
   display: grid;
@@ -932,11 +929,7 @@ button {
 }
 
 
-/* ==========================================================================
-   Projects — deeper into the same room
-   The dial is a clock face whose centre is the bottom-right corner (the same
-   point the light bloomed from). Books sit where the numerals would be.
-   ========================================================================== */
+
 
 .projects {
   position: absolute;
@@ -1512,28 +1505,16 @@ button {
 }
 
 
-/* ==========================================================================
-   Contact — the night comes in through the window
-   APPEND THIS TO THE END OF app/globals.css.
-
-   Same room, later still. The night blooms out from the window (50% / 38%)
-   the way the About light bloomed from the bottom-right corner, and a moment
-   later the desk lamp clicks on.
-   ========================================================================== */
-
 .stage {
   --R3: 150vmax; /* the night fills the whole room */
 }
 
-/* ---- keep the layers underneath painted while the night blooms over them ---- */
 
-/* Projects stays clipped open, then drops to visibility:hidden once the night has covered it
-   (the base .projects rule delays that by --t-bloom). This also takes it out of the tab order. */
 [data-view="contact"] .projects {
   clip-path: circle(var(--R2) at 100% 100%);
 }
 
-/* the Projects ring fades where it is instead of visibly shrinking over the night */
+
 [data-view="contact"] .ring--2 {
   width: calc(var(--R2) * 2);
   height: calc(var(--R2) * 2);
