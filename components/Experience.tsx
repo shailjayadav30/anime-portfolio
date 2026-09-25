@@ -4,14 +4,21 @@ import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 import { site } from "@/lib/site";
-import { CatDoodle, FactIcon, GithubIcon, LinkedinIcon, MailIcon, Sprig } from "./Icons";
+import {
+  CatDoodle,
+  FactIcon,
+  GithubIcon,
+  LinkedinIcon,
+  MailIcon,
+  Sprig,
+} from "./Icons";
 import ContactForm from "./ContactForm";
 
 export type View = "home" | "about" | "projects" | "contact";
 
-const BLOOM_MS = 1300; 
-const STEP_MS = 800; 
-const LAMP_DELAY_MS = 1900; 
+const BLOOM_MS = 1300;
+const STEP_MS = 800;
+const LAMP_DELAY_MS = 1900;
 const PATHS: Record<View, string> = {
   home: "/",
   about: "/about",
@@ -37,7 +44,8 @@ const petals = [
   { left: "54%", top: "91%", r: "-25deg", d: "-5s" },
 ];
 
-const vars = (v: Record<string, string | number>) => v as unknown as CSSProperties;
+const vars = (v: Record<string, string | number>) =>
+  v as unknown as CSSProperties;
 
 function viewFromPath(pathname: string): View {
   const p = pathname.replace(/\/+$/, "");
@@ -49,7 +57,6 @@ function viewFromPath(pathname: string): View {
         ? "contact"
         : "home";
 }
-
 
 function inkFor(hex: string) {
   const n = parseInt(hex.slice(1), 16);
@@ -63,7 +70,13 @@ function inkFor(hex: string) {
   return vsDark >= vsCream ? "#3c2a22" : "#fff6e6";
 }
 
-export default function Experience({ initialView }: { initialView: View }) {
+export default function Experience({
+  initialView,
+  commits,
+}: {
+  initialView: View;
+  commits: number;
+}) {
   const [view, setView] = useState<View>(initialView);
   const [active, setActive] = useState(0);
   const [lampOn, setLampOn] = useState(false);
@@ -83,7 +96,6 @@ export default function Experience({ initialView }: { initialView: View }) {
     document.title = TITLES[view];
   }, [view]);
 
-  
   useEffect(() => {
     if (view !== "contact") {
       setLampOn(false);
@@ -109,7 +121,6 @@ export default function Experience({ initialView }: { initialView: View }) {
     }, ms);
   }, []);
 
-  
   const go = useCallback(
     (next: View, push = true) => {
       if (viewRef.current === next || locked.current) return;
@@ -128,7 +139,6 @@ export default function Experience({ initialView }: { initialView: View }) {
     [COUNT, lock],
   );
 
-  
   const turnTo = useCallback(
     (i: number) => {
       const n = Math.max(0, Math.min(COUNT - 1, i));
@@ -140,7 +150,6 @@ export default function Experience({ initialView }: { initialView: View }) {
     [COUNT, lock],
   );
 
- 
   const advance = useCallback(
     (dir: 1 | -1): boolean => {
       if (locked.current) return false;
@@ -157,7 +166,8 @@ export default function Experience({ initialView }: { initialView: View }) {
       if (v === "about") {
         const el = aboutScroll.current;
         const atTop = !el || el.scrollTop <= 2;
-        const atBottom = !el || el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+        const atBottom =
+          !el || el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
         if (dir === -1 && atTop) {
           go("home");
           return true;
@@ -181,7 +191,6 @@ export default function Experience({ initialView }: { initialView: View }) {
         return false;
       }
 
-     
       const a = activeRef.current;
       if (dir === 1) {
         if (a < COUNT - 1) {
@@ -198,14 +207,13 @@ export default function Experience({ initialView }: { initialView: View }) {
     [COUNT, go, turnTo],
   );
 
-  
   useEffect(() => {
     const inField = (el: EventTarget | null) =>
       !!(el as HTMLElement | null)?.closest?.("input, textarea, select");
 
     const onWheel = (e: WheelEvent) => {
       if (Math.abs(e.deltaY) < 24) return;
-      if (inField(e.target)) return; 
+      if (inField(e.target)) return;
       advance(e.deltaY > 0 ? 1 : -1);
     };
 
@@ -233,7 +241,12 @@ export default function Experience({ initialView }: { initialView: View }) {
         else if (viewRef.current === "about") go("home");
         return;
       }
-      if (t && t !== document.body && /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (
+        t &&
+        t !== document.body &&
+        /^(A|BUTTON|INPUT|TEXTAREA|SELECT)$/.test(t.tagName)
+      )
+        return;
       if (["ArrowDown", "PageDown", " "].includes(e.key)) {
         if (advance(1)) e.preventDefault();
       } else if (["ArrowUp", "PageUp"].includes(e.key)) {
@@ -263,10 +276,11 @@ export default function Experience({ initialView }: { initialView: View }) {
     };
   }, [advance, go]);
 
-
   useEffect(() => {
-    if (view === "about" && prevView.current === "home") aboutScroll.current?.scrollTo({ top: 0 });
-    if (view === "contact" && prevView.current !== "contact") contactScroll.current?.scrollTo({ top: 0 });
+    if (view === "about" && prevView.current === "home")
+      aboutScroll.current?.scrollTo({ top: 0 });
+    if (view === "contact" && prevView.current !== "contact")
+      contactScroll.current?.scrollTo({ top: 0 });
     prevView.current = view;
   }, [view]);
 
@@ -320,10 +334,20 @@ export default function Experience({ initialView }: { initialView: View }) {
       </div>
 
       <div className="socials home-only">
-        <a href={site.github} aria-label="GitHub" target="_blank" rel="noreferrer">
+        <a
+          href={site.github}
+          aria-label="GitHub"
+          target="_blank"
+          rel="noreferrer"
+        >
           <GithubIcon />
         </a>
-        <a href={site.linkedin} aria-label="LinkedIn" target="_blank" rel="noreferrer">
+        <a
+          href={site.linkedin}
+          aria-label="LinkedIn"
+          target="_blank"
+          rel="noreferrer"
+        >
           <LinkedinIcon />
         </a>
         <a href={`mailto:${site.email}`} aria-label="Email">
@@ -331,7 +355,11 @@ export default function Experience({ initialView }: { initialView: View }) {
         </a>
       </div>
 
-      <button className="cue home-only" type="button" onClick={() => go("about")}>
+      <button
+        className="cue home-only"
+        type="button"
+        onClick={() => go("about")}
+      >
         <span className="cue__mouse" aria-hidden="true">
           <span className="cue__dot" />
         </span>
@@ -340,7 +368,12 @@ export default function Experience({ initialView }: { initialView: View }) {
 
       {/* --------------------------------------------------------------- header */}
       <header className="header">
-        <Link className="logo" href="/" aria-label={`${site.brand} — home`} onClick={intercept("home")}>
+        <Link
+          className="logo"
+          href="/"
+          aria-label={`${site.brand} — home`}
+          onClick={intercept("home")}
+        >
           {site.brand}
         </Link>
         <nav className="nav" aria-label="Primary">
@@ -380,12 +413,21 @@ export default function Experience({ initialView }: { initialView: View }) {
       </header>
 
       {/* ---------------------------------------------- about · the sun bloom */}
-      <section className="about" aria-label="About me" aria-hidden={view !== "about"}>
+      <section
+        className="about"
+        aria-label="About me"
+        aria-hidden={view !== "about"}
+      >
         {petals.map((p, i) => (
           <span
             key={i}
             className="petal"
-            style={vars({ left: p.left, top: p.top, animationDelay: p.d, "--r": p.r })}
+            style={vars({
+              left: p.left,
+              top: p.top,
+              animationDelay: p.d,
+              "--r": p.r,
+            })}
             aria-hidden="true"
           />
         ))}
@@ -413,7 +455,8 @@ export default function Experience({ initialView }: { initialView: View }) {
             <h2 className="about__title">
               {about.headline[0]}
               <br />
-              {about.headline[1]} <em>{about.headline[2]}</em> {about.headline[3]}
+              {about.headline[1]} <em>{about.headline[2]}</em>{" "}
+              {about.headline[3]}
             </h2>
 
             <p className="about__bio">
@@ -433,6 +476,10 @@ export default function Experience({ initialView }: { initialView: View }) {
             <p className="about__quote">&ldquo;{about.quote}&rdquo;</p>
 
             <ul className="stats">
+              <li className="stat">
+                <strong>{commits}</strong>
+                <span>Github Commits</span>
+              </li>
               {about.stats.map((s) => (
                 <li className="stat" key={s.label}>
                   <strong>{s.value}</strong>
@@ -453,7 +500,11 @@ export default function Experience({ initialView }: { initialView: View }) {
       </section>
 
       {/* ------------------------------ projects · deeper into the same room */}
-      <section className="projects" aria-label="Projects" aria-hidden={view !== "projects"}>
+      <section
+        className="projects"
+        aria-label="Projects"
+        aria-hidden={view !== "projects"}
+      >
         {/* the same room again — closer, dimmer, later in the day */}
         <div className="projects__bg" aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}

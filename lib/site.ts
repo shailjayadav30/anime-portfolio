@@ -1,4 +1,3 @@
-import { commits } from "./commits";
 
 export const site = {
   brand: "SHAILJA",
@@ -52,7 +51,7 @@ export const site = {
       },
     ],
     stats: [
-      { value: commits, label: "Github Commits" },
+      // { value: contributions.totalCommits, label: "Github Commits" },
       { value: "MCA", label: "Graduate" },
       { value: "∞", label: "Curiosity" },
     ],

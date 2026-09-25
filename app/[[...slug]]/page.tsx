@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Experience from "@/components/Experience";
+import { getAllContributions } from "@/lib/commits";
 
 type Props = { params: { slug?: string[] } };
-
 
 export const dynamicParams = false;
 
@@ -28,6 +28,12 @@ export function generateMetadata({ params }: Props): Metadata {
       : {};
 }
 
-export default function Page({ params }: Props) {
-  return <Experience initialView={viewOf(params.slug)} />;
+export default async function Page({ params }: Props) {
+   const contributions = await getAllContributions();
+  return (
+    <Experience
+      initialView={viewOf(params.slug)}
+      commits={contributions.totalCommits}
+    />
+  );
 }
